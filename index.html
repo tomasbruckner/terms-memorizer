@@ -1,0 +1,170 @@
+<html>
+
+<body onkeyup="handleKey(event)">
+  <div style="height: 100%; width: 100%;">
+    <h1>Term memorizer</h1>
+    <p>
+      To use this website, you need to write terms in format: <strong>TERM - DESCRIPTION</strong>. One term per line. It
+      is very important to insert <strong>-</strong> and only have one term and description per line (press enter for
+      next line). Then press <strong>Update terms</strong>. After you update terms, you can press <strong>Random
+        term</strong> to start memorizing the terms. If you cannot remember the term, click on <strong>Show term
+        description</strong> to see the description. If you think you already memorize, you can delete current term with
+      <strong>Delete current term button</strong>.
+    </p>
+    <p>
+      Example:<br>
+      <pre>
+свой - moje, naše, vaše
+ну - že jo, no
+под - pod, pro, na
+где - kde
+дело - práce, činnost, dílo
+есть - jíst
+сам - sám, osobně
+      </pre>
+    </p>
+    <button onclick="showAllTerms()">Show all terms</button>
+    <button onclick="update()">Update terms</button>
+    <button onclick="clearTerms()">Clear all terms</button>
+    <div style="margin-bottom: 16px;">
+      <textarea id="idDataArea" style="width: 30%;" onfocus="this.rows = 20" onblur="this.rows = 1;"
+        rows="1"></textarea>
+    </div>
+    <button id="idRandomButton" onclick="randomWord()">Random term (from 0)</button>
+    <button onclick="showTerm2()">Show term description</button>
+    <button onclick="switchTerms()">Switch term/description</button>
+    <button onclick="removeTerm()">Delete current term</button>
+    <div style="
+        display: flex;
+        justify-content: center;
+        height: 60%;
+        align-items: center;
+        flex-direction: column;
+      ">
+      <div id="idTerm1" style="font-size: 150px;"></div>
+      <div id="idTerm2" style="font-size: 150px;">&nbsp;</div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'terms';
+    let terms = getTerms();
+    updateTermCount();
+    let currentTerm = {};
+    let termKey = 'term1';
+    let termKey2 = 'term2';
+
+    function update() {
+      const data = document.getElementById('idDataArea').value.trim();
+      const lines = data.split('\n');
+      const parsedData = [];
+
+      if (terms.length !== 0 && lines.length === 0) {
+        return;
+      }
+
+      for (const line of lines) {
+
+        if (!/([^-]+)-(.+)/.test(line)) {
+          continue;
+        }
+
+        const [_, term1, term2] = line.match(/([^-]+)-(.+)/);
+        parsedData.push({ term1: term1.trim(), term2: term2.trim() });
+      }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(parsedData));
+      terms = parsedData;
+
+      document.getElementById('idDataArea').value = '';
+      updateTermCount();
+    }
+
+    function getTerms() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function handleKey(e) {
+      switch (e.code) {
+        case "Space":
+          randomWord();
+          break;
+        case "Enter":
+          showTerm2();
+          break;
+        case "Backspace":
+          removeTerm();
+          break;
+        default:
+          break;
+      }
+    }
+
+    function randomWord() {
+      const index = Math.floor(Math.random() * terms.length);
+      currentTerm = terms[index] || {};
+      setTerm();
+    }
+
+    function switchTerms() {
+      let temp = termKey;
+      termKey = termKey2;
+      termKey2 = temp;
+      setTerm();
+    }
+
+    function setTerm() {
+      document.getElementById('idTerm2').innerText = '';
+      document.getElementById('idTerm1').innerText = currentTerm[termKey];
+    }
+
+    function showTerm2() {
+      document.getElementById('idTerm2').innerText = currentTerm[termKey2];
+    }
+
+    function removeTerm() {
+      if (currentTerm && currentTerm.term1) {
+        const index = terms.findIndex(function (el) {
+          return el.term1 === currentTerm.term1 && el.term2 === currentTerm.term2;
+        });
+        terms.splice(index, 1);
+
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(terms));
+        randomWord();
+        updateTermCount();
+      }
+    }
+
+    function showAllTerms() {
+      if (!terms) {
+        return;
+      }
+
+      const node = document.getElementById('idDataArea');
+      const text = terms.map(function (o) {
+        return `${o.term1} - ${o.term2}`;
+      }).join('\n');
+      node.value = text;
+      node.focus();
+    }
+
+    function clearTerms() {
+      if (confirm('Do you really want to delete all terms?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        terms = [];
+        updateTermCount();
+      }
+    }
+
+    function updateTermCount() {
+      document.getElementById('idRandomButton').innerText = `Random term (from ${terms.length})`;
+    }
+  </script>
+</body>
+
+</html>
