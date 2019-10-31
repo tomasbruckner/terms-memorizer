@@ -3,7 +3,7 @@
 <body onkeyup="handleKey(event)">
   <div style="height: 100%; width: 100%;">
     <h1>Term memorizer</h1>
-    <div id="idLegend">
+    <div id="idLegend" hidden>
       <p style="width: 50%;">
         To use this website, you need to write terms in format: <strong>TERM - DESCRIPTION</strong>. One term per line.
         It
@@ -26,6 +26,14 @@
   дело - práce, činnost, dílo
   есть - jíst
   сам - sám, osobně
+        </pre>
+      </p>
+      <p>
+        Available hotkeys:<br>
+        <pre>
+  Enter - show description
+  Spacebar - random term
+  Backspace - remove current term
         </pre>
       </p>
     </div>
