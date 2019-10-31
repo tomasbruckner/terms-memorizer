@@ -5,10 +5,7 @@
     <h1>Terms memorizer</h1>
     <div id="idLegend" hidden>
       <p style="width: 50%;">
-        To use this website, you need to write terms in format: <strong>TERM - DESCRIPTION</strong>. One term per line.
-        It
-        is very important to insert <strong>-</strong> and only have one term and description per line (press enter for
-        next line). Then press <strong>Update terms</strong>. After you update terms, you can press <strong>Random
+        To use this website, you need to write terms in format: <strong>TERM; DESCRIPTION;</strong>. You can export this from Excel (save as CSV). Then press <strong>Update terms</strong>. After you update terms, you can press <strong>Random
           term</strong> to start memorizing the terms. If you cannot remember the term, click on <strong>Show term
           description</strong> to see the description. If you think you already memorize, you can delete current term
         with
@@ -19,13 +16,13 @@
       <p>
         Example:<br>
         <pre>
-  свой - moje, naše, vaše
-  ну - že jo, no
-  под - pod, pro, na
-  где - kde
-  дело - práce, činnost, dílo
-  есть - jíst
-  сам - sám, osobně
+  свой ; moje, naše, vaše ;
+  ну ; že jo, no ;
+  под ; pod, pro, na ;
+  где ; kde ;
+  дело ; práce, činnost, dílo ;
+  есть ; jíst ;
+  сам ; sám, osobně ;
         </pre>
       </p>
       <p>
@@ -74,21 +71,15 @@
 
     function update() {
       const data = document.getElementById('idDataArea').value.trim();
-      const lines = data.split('\n');
-      const parsedData = [];
+      const tokens = data.split(';');
 
-      if (terms.length !== 0 && lines.length === 0) {
+      if (terms.length !== 0 && tokens.length < 2) {
         return;
       }
 
-      for (const line of lines) {
-
-        if (!/([^-]+)-(.+)/.test(line)) {
-          continue;
-        }
-
-        const [_, term1, term2] = line.match(/([^-]+)-(.+)/);
-        parsedData.push({ term1: term1.trim(), term2: term2.trim() });
+      const parsedData = [];
+      for (let i = 1; i < tokens.length; i += 2) {
+        parsedData.push({ term1: tokens[i - 1].trim(), term2: tokens[i].trim() });
       }
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(parsedData));
@@ -165,9 +156,9 @@
 
       const node = document.getElementById('idDataArea');
       const text = terms.map(function (o) {
-        return `${o.term1} - ${o.term2}`;
-      }).join('\n');
-      node.value = text;
+        return `${o.term1}; ${o.term2}`;
+      }).join(';\n');
+      node.value = `${text};`;
       node.focus();
     }
 
